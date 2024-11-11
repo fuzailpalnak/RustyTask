@@ -4,29 +4,29 @@ mod tasks;
 #[path = "core/manager.rs"]
 mod manager;
 
-use chrono::NaiveDate;
-use manager::TaskManager;
-use serde::{Deserialize, Serialize};
+#[path = "core/cli/base.rs"]
+mod cli;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct MyStruct {
-    name: String,
-    age: u32,
-}
+#[path = "core/cli/reminder.rs"]
+mod reminder_cli;
+
+use cli::EventCLI;
+use manager::ReminderTaskManager;
+use reminder_cli::ReminderCLI;
+use tasks::Reminder;
 
 fn main() {
-    let due_date = NaiveDate::from_ymd_opt(2024, 11, 10).unwrap();
+    let mut task_manager: ReminderTaskManager<Reminder> = ReminderTaskManager::new();
 
-    let reminder = tasks::Reminder::new(
-        "Study Rust".to_string(),
-        "Complete Rust book".to_string(),
-        due_date,
-        tasks::Priority::High,
-    );
-    let mut task_manager: manager::ReminderTaskManager<tasks::Reminder> =
-        manager::ReminderTaskManager::new();
-
-    task_manager.add_task(reminder);
-
-    task_manager.complete(1);
+    loop {
+        let option = cli::welcome_message();
+        match option.as_str() {
+            "1" => {
+                let mut reminder_cli = ReminderCLI;
+                reminder_cli.process_input(&mut task_manager);
+            }
+            "3" => break,
+            _ => println!("Invalid option. Please try again."),
+        }
+    }
 }

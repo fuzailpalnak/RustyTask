@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -25,7 +25,7 @@ pub trait Tasks<T> {
 pub struct Reminder {
     title: String,
     description: String,
-    due_date: NaiveDate,
+    due_date: NaiveDateTime,
     priority: Priority,
     status: Status,
 }
@@ -34,7 +34,7 @@ impl Reminder {
     pub fn new(
         title: String,
         description: String,
-        due_date: NaiveDate,
+        due_date: NaiveDateTime,
         priority: Priority,
     ) -> Self {
         Self {

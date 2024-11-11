@@ -9,6 +9,7 @@ pub trait TaskManager<T> {
     }
 
     fn add_task(&mut self, task_name: T);
+    fn delete_task(&mut self, task_id: i32);
 }
 pub struct ReminderTaskManager<Reminder> {
     tasks: HashMap<i32, Reminder>,
@@ -20,6 +21,10 @@ impl<Reminder> TaskManager<Reminder> for ReminderTaskManager<Reminder> {
         let task_id = self.next_id;
         self.tasks.insert(task_id, task);
         self.next_id += 1;
+    }
+
+    fn delete_task(&mut self, task_id: i32) {
+        self.tasks.remove(&task_id);
     }
 }
 
@@ -48,9 +53,5 @@ where
         if let Some(task) = self.tasks.get_mut(&task_id) {
             task.update_status(status);
         }
-    }
-
-    pub fn delete_task(&mut self, task_id: i32) {
-        self.tasks.remove(&task_id);
     }
 }

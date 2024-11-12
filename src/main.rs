@@ -4,29 +4,23 @@ mod tasks;
 #[path = "core/manager.rs"]
 mod manager;
 
-#[path = "core/cli/base.rs"]
+#[path = "core/cli.rs"]
 mod cli;
 
-#[path = "core/cli/reminder.rs"]
-mod reminder_cli;
-
 use cli::EventCLI;
-use manager::ReminderTaskManager;
-use reminder_cli::ReminderCLI;
-use tasks::Reminder;
+use cli::{EventTypeCLI, CLI};
 
 fn main() {
-    let mut task_manager: ReminderTaskManager<Reminder> = ReminderTaskManager::new();
-
     loop {
-        let option = cli::welcome_message();
-        match option.as_str() {
-            "1" => {
-                let mut reminder_cli = ReminderCLI;
-                reminder_cli.process_input(&mut task_manager);
+        match CLI::get_event_cli() {
+            Some(EventTypeCLI::Ok(mut value)) => {
+                let mut task_manager = value.load_task_manger();
+                value.process_input(&mut task_manager);
             }
-            "3" => break,
-            _ => println!("Invalid option. Please try again."),
+            None => {
+                println!("Exiting CLI.");
+                break;
+            }
         }
     }
 }

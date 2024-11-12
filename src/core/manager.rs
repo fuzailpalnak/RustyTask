@@ -1,7 +1,7 @@
 use crate::tasks::{Priority, Reminder, Status, Tasks};
 use std::collections::HashMap;
 
-pub trait TaskManager<T> {
+pub trait TaskManager<T: Tasks> {
     fn default_values() -> (HashMap<i32, T>, i32) {
         let tasks = HashMap::new();
         let next_id = 1;
@@ -10,13 +10,15 @@ pub trait TaskManager<T> {
 
     fn add_task(&mut self, task_name: T);
     fn delete_task(&mut self, task_id: i32);
+    fn view_tasks(&mut self);
 }
-pub struct ReminderTaskManager<Reminder> {
-    tasks: HashMap<i32, Reminder>,
+
+pub struct ReminderTaskManager<T: Tasks> {
+    tasks: HashMap<i32, T>,
     next_id: i32,
 }
 
-impl<Reminder> TaskManager<Reminder> for ReminderTaskManager<Reminder> {
+impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
     fn add_task(&mut self, task: Reminder) {
         let task_id = self.next_id;
         self.tasks.insert(task_id, task);
@@ -26,14 +28,24 @@ impl<Reminder> TaskManager<Reminder> for ReminderTaskManager<Reminder> {
     fn delete_task(&mut self, task_id: i32) {
         self.tasks.remove(&task_id);
     }
+
+    fn view_tasks(&mut self) {
+        if self.tasks.is_empty() {
+            println!("No tasks available.");
+        } else {
+            println!("\nCurrent Tasks:");
+            for (task_id, task) in &self.tasks {
+                println!("{:?}", task);
+            }
+            println!("---------------------------------");
+        }
+    }
 }
 
-impl<T> ReminderTaskManager<T>
-where
-    T: Tasks<Reminder>,
-{
+impl ReminderTaskManager<Reminder> {
     pub fn new() -> Self {
-        let (tasks, next_id) = <ReminderTaskManager<T> as TaskManager<T>>::default_values();
+        let (tasks, next_id) =
+            <ReminderTaskManager<Reminder> as TaskManager<Reminder>>::default_values();
         ReminderTaskManager { tasks, next_id }
     }
 

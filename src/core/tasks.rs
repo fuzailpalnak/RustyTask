@@ -15,7 +15,7 @@ pub enum Status {
     Completed,
 }
 
-pub trait Tasks<T> {
+pub trait Tasks {
     fn mark_complete(&mut self);
     fn update_priority(&mut self, priority: Priority);
     fn update_status(&mut self, status: Status);
@@ -23,11 +23,11 @@ pub trait Tasks<T> {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Reminder {
-    title: String,
-    description: String,
-    due_date: NaiveDateTime,
-    priority: Priority,
-    status: Status,
+    pub title: String,
+    pub description: String,
+    pub due_date: NaiveDateTime,
+    pub priority: Priority,
+    pub status: Status,
 }
 
 impl Reminder {
@@ -46,7 +46,7 @@ impl Reminder {
         }
     }
 }
-impl<T> Tasks<T> for Reminder {
+impl Tasks for Reminder {
     fn mark_complete(&mut self) {
         self.status = Status::Completed;
     }

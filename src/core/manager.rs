@@ -1,8 +1,6 @@
 use crate::tasks::{Reminder, Status, Tasks};
-use chrono::{NaiveDateTime, Utc};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::thread;
 use std::time::Duration;
 
 pub trait TaskManager<T: Tasks> {
@@ -15,7 +13,6 @@ pub trait TaskManager<T: Tasks> {
     fn add(&mut self, task_name: T);
     fn delete(&mut self, task_id: i32);
     fn view(&mut self);
-    fn complete(&mut self, task_id: i32);
 }
 
 pub struct ReminderTaskManager<T: Tasks> {
@@ -24,14 +21,6 @@ pub struct ReminderTaskManager<T: Tasks> {
 }
 
 impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
-    fn complete(&mut self, task_id: i32) {
-        match self.tasks.get_mut(&task_id) {
-            Some(task) => {
-                task.mark_complete();
-            }
-            None => {}
-        }
-    }
     fn add(&mut self, task: Reminder) {
         let task_id = self.next_id;
         self.tasks.insert(task_id, task);
@@ -61,7 +50,22 @@ impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
     }
 }
 
-impl ReminderTaskManager<Reminder> {}
+impl ReminderTaskManager<Reminder> {
+    pub async fn start_notification_task(task_manager: Arc<Mutex<Self>>) {
+        loop {
+            tokio::time::sleep(Duration::from_secs(1)).await;
+
+            let mut task_manager = task_manager.lock().unwrap();
+
+            for task in task_manager.tasks.values_mut() {
+                if task.status == Status::Pending && task.should_notify() {
+                    task.notify();
+                    task.mark_complete();
+                }
+            }
+        }
+    }
+}
 
 pub fn load_reminder_event_task_manager() -> ReminderTaskManager<Reminder> {
     let (tasks, next_id) =

@@ -46,10 +46,9 @@ impl EventCLI<ReminderTaskManager<Reminder>> for ReminderCLI {
     fn display_menu() {
         println!("\nReminder Management:");
         println!("1: Add Task");
-        println!("2: Mark Task Complete");
-        println!("3: View Tasks");
-        println!("4: Delete Task");
-        println!("5: Exit");
+        println!("2: View Tasks");
+        println!("3: Delete Task");
+        println!("4: Exit");
     }
 
     fn process_input(&mut self, task_manager: &mut ReminderTaskManager<Reminder>) {
@@ -61,12 +60,8 @@ impl EventCLI<ReminderTaskManager<Reminder>> for ReminderCLI {
                 Ok(reminder) => task_manager.add(reminder),
                 Err(_) => println!("Failed to add reminder."),
             },
-            "2" => match Self::get_id_from_user_promt() {
-                Ok(id) => task_manager.complete(id),
-                Err(_) => println!("Failed to delete reminder."),
-            },
-            "3" => task_manager.view(),
-            "4" => match Self::get_id_from_user_promt() {
+            "2" => task_manager.view(),
+            "3" => match Self::get_id_from_user_promt() {
                 Ok(id) => task_manager.delete(id),
                 Err(_) => println!("Failed to delete reminder."),
             },

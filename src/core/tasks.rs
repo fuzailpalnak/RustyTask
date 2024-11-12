@@ -43,6 +43,18 @@ impl Reminder {
             status: Status::Pending,
         }
     }
+
+    pub fn should_notify(&self) -> bool {
+        let now = chrono::Local::now().naive_local();
+        let notify_time = self.due_date - chrono::Duration::minutes(15);
+        println!("{:?}", notify_time);
+        println!("{:?}", now);
+        now >= notify_time && now < self.due_date
+    }
+
+    pub fn notify(&self) {
+        println!("Reminder: '{}' is due in 15 minutes!", self.title);
+    }
 }
 impl Tasks for Reminder {
     fn mark_complete(&mut self) {

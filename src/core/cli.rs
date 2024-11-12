@@ -6,7 +6,14 @@ pub enum EventTypeCLI {
     Ok(ReminderCLI),
 }
 
+pub trait EventCLI<M> {
+    fn display_menu();
+    fn process_input(&mut self, task_manager: &mut M);
+}
+
 pub struct CLI {}
+pub struct ReminderCLI;
+
 impl CLI {
     pub fn welcome_message() {
         println!("\nSelect an option:");
@@ -34,41 +41,33 @@ impl CLI {
         }
     }
 }
-pub trait EventCLI<M> {
-    fn display_menu();
-    fn process_input(&mut self, task_manager: &mut M);
-    fn load_task_manger(&mut self) -> M;
-}
-
-pub struct ReminderCLI;
 
 impl EventCLI<ReminderTaskManager<Reminder>> for ReminderCLI {
     fn display_menu() {
         println!("\nReminder Management:");
         println!("1: Add Task");
         println!("2: Mark Task Complete");
-        println!("3: Update Task Priority");
-        println!("4: View Tasks");
-        println!("5: Delete Task");
-        println!("6: Exit");
+        println!("3: View Tasks");
+        println!("4: Delete Task");
+        println!("5: Exit");
     }
 
-    fn load_task_manger(&mut self) -> ReminderTaskManager<Reminder> {
-        let task_manager: ReminderTaskManager<Reminder> = ReminderTaskManager::new();
-        task_manager
-    }
     fn process_input(&mut self, task_manager: &mut ReminderTaskManager<Reminder>) {
         Self::display_menu();
         let option = CLI::get_user_input();
 
         match option.as_str() {
             "1" => match Self::get_reminder() {
-                Ok(reminder) => task_manager.add_task(reminder),
+                Ok(reminder) => task_manager.add(reminder),
                 Err(_) => println!("Failed to add reminder."),
             },
-            "4" => task_manager.view_tasks(),
-            "5" => match Self::delete_task() {
-                Ok(id) => task_manager.delete_task(id),
+            "2" => match Self::get_id_from_user_promt() {
+                Ok(id) => task_manager.complete(id),
+                Err(_) => println!("Failed to delete reminder."),
+            },
+            "3" => task_manager.view(),
+            "4" => match Self::get_id_from_user_promt() {
+                Ok(id) => task_manager.delete(id),
                 Err(_) => println!("Failed to delete reminder."),
             },
             _ => println!("Invalid option. Please try again."),
@@ -102,7 +101,7 @@ impl ReminderCLI {
         Ok(reminder)
     }
 
-    pub fn delete_task() -> Result<i32, ()> {
+    pub fn get_id_from_user_promt() -> Result<i32, ()> {
         println!("Enter task ID to delete:");
         CLI::get_user_input().parse().map_err(|_| ())
     }

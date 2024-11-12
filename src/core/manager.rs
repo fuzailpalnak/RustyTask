@@ -1,5 +1,9 @@
-use crate::tasks::{Priority, Reminder, Status, Tasks};
+use crate::tasks::{Reminder, Status, Tasks};
+use chrono::{NaiveDateTime, Utc};
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
 pub trait TaskManager<T: Tasks> {
     fn default_values() -> (HashMap<i32, T>, i32) {
@@ -8,62 +12,60 @@ pub trait TaskManager<T: Tasks> {
         (tasks, next_id)
     }
 
-    fn add_task(&mut self, task_name: T);
-    fn delete_task(&mut self, task_id: i32);
-    fn view_tasks(&mut self);
+    fn add(&mut self, task_name: T);
+    fn delete(&mut self, task_id: i32);
+    fn view(&mut self);
+    fn complete(&mut self, task_id: i32);
 }
 
 pub struct ReminderTaskManager<T: Tasks> {
-    tasks: HashMap<i32, T>,
-    next_id: i32,
+    pub tasks: HashMap<i32, T>,
+    pub next_id: i32,
 }
 
 impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
-    fn add_task(&mut self, task: Reminder) {
+    fn complete(&mut self, task_id: i32) {
+        match self.tasks.get_mut(&task_id) {
+            Some(task) => {
+                task.mark_complete();
+            }
+            None => {}
+        }
+    }
+    fn add(&mut self, task: Reminder) {
         let task_id = self.next_id;
         self.tasks.insert(task_id, task);
         self.next_id += 1;
     }
 
-    fn delete_task(&mut self, task_id: i32) {
+    fn delete(&mut self, task_id: i32) {
         self.tasks.remove(&task_id);
     }
 
-    fn view_tasks(&mut self) {
+    fn view(&mut self) {
         if self.tasks.is_empty() {
             println!("No tasks available.");
         } else {
             println!("\nCurrent Tasks:");
-            for (task_id, task) in &self.tasks {
-                println!("{:?}", task);
-            }
             println!("---------------------------------");
+
+            for (task_id, task) in &self.tasks {
+                println!("Task ID: {}", task_id);
+                println!("Title: {}", task.title);
+                println!("Description: {}", task.description);
+                println!("Due Date: {}", task.due_date.format("%Y-%m-%d %H:%M:%S"));
+                println!("Priority: {:?}", task.priority);
+                println!("---------------------------------");
+            }
         }
     }
 }
 
-impl ReminderTaskManager<Reminder> {
-    pub fn new() -> Self {
-        let (tasks, next_id) =
-            <ReminderTaskManager<Reminder> as TaskManager<Reminder>>::default_values();
-        ReminderTaskManager { tasks, next_id }
-    }
+impl ReminderTaskManager<Reminder> {}
 
-    pub fn complete(&mut self, task_id: i32) {
-        if let Some(task) = self.tasks.get_mut(&task_id) {
-            task.mark_complete();
-        }
-    }
-
-    pub fn update_priority(&mut self, task_id: i32, priority: Priority) {
-        if let Some(task) = self.tasks.get_mut(&task_id) {
-            task.update_priority(priority);
-        }
-    }
-
-    pub fn update_status(&mut self, task_id: i32, status: Status) {
-        if let Some(task) = self.tasks.get_mut(&task_id) {
-            task.update_status(status);
-        }
-    }
+pub fn load_reminder_event_task_manager() -> ReminderTaskManager<Reminder> {
+    let (tasks, next_id) =
+        <ReminderTaskManager<Reminder> as TaskManager<Reminder>>::default_values();
+    let task_manager: ReminderTaskManager<Reminder> = ReminderTaskManager { tasks, next_id };
+    task_manager
 }

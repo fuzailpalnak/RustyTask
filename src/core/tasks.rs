@@ -8,7 +8,7 @@ pub enum Priority {
     High,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Status {
     Pending,
     InProgress,
@@ -17,8 +17,6 @@ pub enum Status {
 
 pub trait Tasks {
     fn mark_complete(&mut self);
-    fn update_priority(&mut self, priority: Priority);
-    fn update_status(&mut self, status: Status);
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -49,13 +47,5 @@ impl Reminder {
 impl Tasks for Reminder {
     fn mark_complete(&mut self) {
         self.status = Status::Completed;
-    }
-
-    fn update_priority(&mut self, priority: Priority) {
-        self.priority = priority;
-    }
-
-    fn update_status(&mut self, status: Status) {
-        self.status = status;
     }
 }

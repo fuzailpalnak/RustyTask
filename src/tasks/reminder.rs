@@ -1,23 +1,7 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum Priority {
-    Low,
-    Medium,
-    High,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub enum Status {
-    Pending,
-    InProgress,
-    Completed,
-}
-
-pub trait Tasks {
-    fn mark_complete(&mut self);
-}
+use super::base::{Priority, Status, Tasks};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Reminder {
@@ -46,7 +30,7 @@ impl Reminder {
 
     pub fn should_notify(&self) -> bool {
         let now = chrono::Local::now().naive_local();
-        let notify_time = self.due_date - chrono::Duration::minutes(15);
+        let notify_time = self.due_date - chrono::Duration::minutes(1);
         println!("{:?}", notify_time);
         println!("{:?}", now);
         now >= notify_time && now < self.due_date

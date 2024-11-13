@@ -1,26 +1,20 @@
-#[path = "core/tasks.rs"]
+mod cli;
+mod manager;
 mod tasks;
 
-#[path = "core/manager.rs"]
-mod manager;
-
-#[path = "core/cli.rs"]
-mod cli;
-
-use cli::EventCLI;
-use cli::{EventTypeCLI, CLI};
-
+use crate::cli::base::{EventCLI, EventTypeCLI, CLI};
+use crate::manager::reminder_manager::ReminderTaskManager;
 use std::sync::{Arc, Mutex};
 
 #[tokio::main]
 async fn main() {
-    let reminder_task_manager = manager::load_reminder_event_task_manager();
+    let reminder_task_manager = manager::reminder_manager::load_reminder_event_task_manager();
     let task_manager = Arc::new(Mutex::new(reminder_task_manager));
 
     // Start the notification task in the background
     let task_manager_clone = Arc::clone(&task_manager);
     tokio::spawn(async move {
-        manager::ReminderTaskManager::start_notification_task(task_manager_clone).await;
+        ReminderTaskManager::start_notification_task(task_manager_clone).await;
     });
 
     // CLI loop

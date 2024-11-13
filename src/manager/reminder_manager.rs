@@ -1,6 +1,8 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Duration;
+
+use tokio::sync::RwLock;
 
 use super::base::TaskManager;
 use crate::tasks::base::{Status, Tasks};
@@ -21,7 +23,7 @@ impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
         self.tasks.remove(&task_id);
     }
 
-    fn view(&mut self) {
+    fn view(&self) {
         if self.tasks.is_empty() {
             println!("No tasks available.");
         } else {
@@ -41,12 +43,11 @@ impl TaskManager<Reminder> for ReminderTaskManager<Reminder> {
 }
 
 impl ReminderTaskManager<Reminder> {
-    pub async fn start_notification_task(task_manager: Arc<Mutex<Self>>) {
+    pub async fn start_notification_task(task_manager: Arc<RwLock<Self>>) {
         loop {
             tokio::time::sleep(Duration::from_secs(1)).await;
 
-            let mut task_manager = task_manager.lock().unwrap();
-
+            let mut task_manager = task_manager.write().await;
             for task in task_manager.tasks.values_mut() {
                 if task.status == Status::Pending && task.should_notify() {
                     task.notify();

@@ -1,6 +1,7 @@
-use chrono::NaiveDateTime;
-
 use super::base::{EventCLI, CLI};
+use chrono::NaiveDateTime;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 use crate::manager::base::TaskManager;
 use crate::manager::reminder_manager::ReminderTaskManager;
@@ -17,18 +18,27 @@ impl EventCLI<ReminderTaskManager<Reminder>> for ReminderCLI {
         println!("4: Exit");
     }
 
-    fn process_input(&mut self, task_manager: &mut ReminderTaskManager<Reminder>) {
+    async fn process_input(&mut self, task_manager: &Arc<RwLock<ReminderTaskManager<Reminder>>>) {
         Self::display_menu();
         let option = CLI::get_user_input();
 
         match option.as_str() {
             "1" => match Self::get_reminder() {
-                Ok(reminder) => task_manager.add(reminder),
+                Ok(reminder) => {
+                    let mut task_manager = task_manager.write().await;
+                    task_manager.add(reminder);
+                }
                 Err(_) => println!("Failed to add reminder."),
             },
-            "2" => task_manager.view(),
+            "2" => {
+                let task_manager = task_manager.read().await;
+                task_manager.view();
+            }
             "3" => match Self::get_id_from_user_promt() {
-                Ok(id) => task_manager.delete(id),
+                Ok(id) => {
+                    let mut task_manager = task_manager.write().await;
+                    task_manager.delete(id);
+                }
                 Err(_) => println!("Failed to delete reminder."),
             },
             _ => println!("Invalid option. Please try again."),

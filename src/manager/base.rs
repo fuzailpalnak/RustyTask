@@ -10,5 +10,5 @@ pub trait TaskManager<T: Tasks> {
 
     fn add(&mut self, task_name: T);
     fn delete(&mut self, task_id: i32);
-    fn view(&mut self);
+    fn view(&self);
 }

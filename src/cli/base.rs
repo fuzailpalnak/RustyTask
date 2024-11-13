@@ -1,12 +1,13 @@
 use super::reminder_cli::ReminderCLI;
-
+use std::sync::Arc;
+use tokio::sync::RwLock;
 pub enum EventTypeCLI {
     Ok(ReminderCLI),
 }
 
 pub trait EventCLI<M> {
     fn display_menu();
-    fn process_input(&mut self, task_manager: &mut M);
+    async fn process_input(&mut self, task_manager: &Arc<RwLock<M>>);
 }
 
 pub struct CLI {}

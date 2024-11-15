@@ -57,6 +57,7 @@ impl CLI {
                     return Err("Invalid date-time format. Please use YYYY-MM-DD HH:MM.".to_string())
                 }
             };
+
         let reminder = Reminder::new(title, description, due_datetime);
         Ok(reminder)
     }

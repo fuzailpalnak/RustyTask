@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
-use super::base::{Status, Tasks};
+use super::base::{EventType, Status, Tasks};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Reminder {
@@ -9,6 +9,7 @@ pub struct Reminder {
     pub description: String,
     pub due_date: NaiveDateTime,
     pub status: Status,
+    pub event_type: EventType,
 }
 
 impl Reminder {
@@ -18,10 +19,37 @@ impl Reminder {
             description,
             due_date,
             status: Status::Active,
+            event_type: EventType::OneTime,
         }
     }
 }
 impl Tasks for Reminder {
+    fn handle_update(&mut self) {
+        let current_time = chrono::Local::now().naive_local();
+
+        match self.event_type {
+            _ => {
+                
+            }
+            EventType::Daily => {
+                self.due_date = current_time + chrono::Duration::days(1);
+            }
+            EventType::Monthly => {
+                self.due_date = current_time + chrono::Duration::days(30); 
+            }
+            EventType::Yearly => {
+                self.due_date = current_time + chrono::Duration::days(365); 
+            }
+        }
+    }
+}
+
+    fn is_recurring(&self) -> bool {
+        match self.event_type {
+            EventType::OneTime => false,
+            _ => true,
+        }
+    }
     fn notify(&self) -> bool {
         matches!(self.status, Status::Active) && {
             let current_time = chrono::Local::now().naive_local();

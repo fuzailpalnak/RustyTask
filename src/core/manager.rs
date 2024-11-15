@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use crate::core::tasks::base::Status;
-use crate::core::tasks::base::Tasks;
+use crate::core::tasks::base::{EventType, Status, Tasks};
 use crate::utils::ui;
 use std::sync::Arc;
 use std::time::Duration;
@@ -31,17 +30,18 @@ impl<T: Tasks> TaskManager<T> {
     }
 
     pub fn monitor(&mut self) {
-        let mut tasks_to_update = Vec::new();
-
-        for (task_id, task) in self.tasks.iter() {
+        for (task_id, task) in self.tasks.iter_mut() {
             if task.notify() {
-                tasks_to_update.push(*task_id);
-                ui::sent_notification(&task.summary());
+                match task.is_recurring() {
+                    false => {
+                        self.complete(*task_id);
+                        ui::sent_notification(&task.summary());
+                    }
+                    true => {
+                        task.handle_update();
+                    }
+                }
             }
-        }
-
-        for task_id in tasks_to_update {
-            self.complete(task_id);
         }
     }
 }

@@ -47,7 +47,7 @@ impl Tasks for Reminder {
     fn notify(&self) -> bool {
         matches!(self.status, Status::Active) && {
             let current_time = chrono::Local::now().naive_local();
-            let notify_time = self.due_date - chrono::Duration::minutes(1);
+            let notify_time = self.due_date - chrono::Duration::minutes(15);
             current_time >= notify_time && current_time < self.due_date
         }
     }
@@ -57,6 +57,9 @@ impl Tasks for Reminder {
     }
 
     fn summary(&self) -> String {
-        format!("Title: {}\nDescription: {}", self.title, self.description)
+        format!(
+            "🚨 Reminder: {}\n🔔 Don't forget to: {}",
+            self.title, self.description
+        )
     }
 }

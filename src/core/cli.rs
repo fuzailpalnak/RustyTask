@@ -107,7 +107,10 @@ impl CLI {
                 let mut task_manager = task_manager.write().await;
                 task_manager.add(reminder);
 
-                match ui::sent_notification(&String::from("Reminder Successfully Added"), true) {
+                match ui::sent_notification(
+                    &String::from("✅ Your reminder has been successfully added! You're all set!"),
+                    true,
+                ) {
                     Ok(_) => Ok(()),
                     Err(e) => Err(format!("Failed to create reminder due to {}.", e)),
                 }

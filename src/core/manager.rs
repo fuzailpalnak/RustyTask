@@ -30,11 +30,13 @@ impl<T: Tasks> TaskManager<T> {
     }
 
     pub fn monitor(&mut self) {
+        let mut tasks_to_update = Vec::new();
+
         for (task_id, task) in self.tasks.iter_mut() {
             if task.notify() {
                 match task.is_recurring() {
                     false => {
-                        self.complete(*task_id);
+                        tasks_to_update.push(*task_id);
                         ui::sent_notification(&task.summary());
                     }
                     true => {
@@ -43,11 +45,16 @@ impl<T: Tasks> TaskManager<T> {
                 }
             }
         }
+
+        for task_id in tasks_to_update {
+            self.complete(task_id);
+        }
     }
 }
 
 pub fn load_task_manager<T: Tasks>() -> TaskManager<T> {
     let (tasks, next_id) = (HashMap::new(), 1);
+
     TaskManager { tasks, next_id }
 }
 

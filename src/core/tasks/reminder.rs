@@ -28,21 +28,15 @@ impl Tasks for Reminder {
         let current_time = chrono::Local::now().naive_local();
 
         match self.event_type {
-            _ => {
-                
-            }
             EventType::Daily => {
                 self.due_date = current_time + chrono::Duration::days(1);
             }
-            EventType::Monthly => {
-                self.due_date = current_time + chrono::Duration::days(30); 
+            EventType::Montly => {
+                self.due_date = current_time + chrono::Duration::days(30);
             }
-            EventType::Yearly => {
-                self.due_date = current_time + chrono::Duration::days(365); 
-            }
+            _ => {}
         }
     }
-}
 
     fn is_recurring(&self) -> bool {
         match self.event_type {

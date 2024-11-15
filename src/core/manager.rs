@@ -29,6 +29,10 @@ impl<T: Tasks> TaskManager<T> {
         }
     }
 
+    pub fn delete(&mut self, task_id: i32) {
+        self.tasks.remove(&task_id);
+    }
+
     pub fn monitor(&mut self) {
         let mut tasks_to_update = Vec::new();
 

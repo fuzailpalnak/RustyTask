@@ -70,8 +70,8 @@ impl CLI {
     async fn delete(task_manager: &Arc<RwLock<TaskManager<Reminder>>>) -> Result<(), String> {
         match CLI::get_id_from_user_prompt() {
             Ok(id) => {
-                // let mut task_manager = task_manager.write().await;
-                // task_manager.remove(id);
+                let mut task_manager = task_manager.write().await;
+                task_manager.delete(id);
 
                 match ui::sent_notification(&String::from("Feature Not Supported."), true) {
                     Ok(_) => Ok(()),

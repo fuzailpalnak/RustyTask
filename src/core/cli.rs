@@ -4,7 +4,7 @@ use tokio::sync::RwLock;
 
 use crate::core::tasks::reminder::Reminder;
 use crate::manager::TaskManager;
-
+use crate::utils::ui;
 pub struct CLI;
 
 impl CLI {
@@ -70,10 +70,13 @@ impl CLI {
     async fn delete(task_manager: &Arc<RwLock<TaskManager<Reminder>>>) -> Result<(), String> {
         match CLI::get_id_from_user_prompt() {
             Ok(id) => {
-                let mut task_manager = task_manager.write().await;
+                // let mut task_manager = task_manager.write().await;
                 // task_manager.remove(id);
-                println!("Reminder deleted successfully.");
-                Ok(())
+
+                match ui::sent_notification(&String::from("Feature Not Supported."), true) {
+                    Ok(_) => Ok(()),
+                    Err(_) => Err("Failed to delete reminder.".to_string()),
+                }
             }
             Err(_) => {
                 println!("Failed to delete reminder.");
@@ -103,8 +106,11 @@ impl CLI {
             Ok(reminder) => {
                 let mut task_manager = task_manager.write().await;
                 task_manager.add(reminder);
-                println!("Reminder added successfully.");
-                Ok(())
+
+                match ui::sent_notification(&String::from("Reminder Successfully Added"), true) {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(format!("Failed to create reminder due to {}.", e)),
+                }
             }
             Err(_) => {
                 println!("Failed to add reminder.");
